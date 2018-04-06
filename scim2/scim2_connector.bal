@@ -18,7 +18,7 @@
 
 package scim2;
 
-import ballerina/net.http;
+import ballerina/http;
 import ballerina/mime;
 import oauth2;
 

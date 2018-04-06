@@ -17,7 +17,7 @@
 
 package scim2;
 
-import ballerina/net.http;
+import ballerina/http;
 import oauth2;
 
 @Description {value:"SCIM2 connector configuration should be setup when initializing the endpoint. The User needs to

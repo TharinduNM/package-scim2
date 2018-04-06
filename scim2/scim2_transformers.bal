@@ -456,17 +456,10 @@ function convertUserToJson (User sourceUserStruct, string updateOrCreate) return
     json[] listNumbers = sourceUserStruct.phoneNumbers != null ? toJsonPhoneNumbers(sourceUserStruct) : [];
     targetJson.phoneNumbers = listNumbers;
 
-    json[] listIms = sourceUserStruct.ims != null ?
-                     sourceUserStruct.ims.map(
-                                         function (PhonePhotoIms nestedIMS) returns json {
-                                             return convertPhonePhotoImsToJson(nestedIMS);
-                                         }) : [];
+    json[] listIms = sourceUserStruct.ims != null ? toJsonPhotos(sourceUserStruct) : [];
     targetJson.ims = listIms;
-    json[] listPhotos = sourceUserStruct.photos != null ?
-                        sourceUserStruct.photos.map(
-                                               function (PhonePhotoIms nestedPhotos) returns json {
-                                                   return convertPhonePhotoImsToJson(nestedPhotos);
-                                               }) : [];
+
+    json[] listPhotos = sourceUserStruct.photos != null ? toJsonIms(sourceUserStruct) : [];
     targetJson.photos = listPhotos;
 
     targetJson.^"urn:ietf:params:scim:schemas:extension:enterprise:2.0:User" = sourceUserStruct.EnterpriseUser !=
