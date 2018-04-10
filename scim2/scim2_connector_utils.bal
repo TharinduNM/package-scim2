@@ -15,17 +15,14 @@
 // specific language governing permissions and limitations
 // under the License.
 //
-
-package scim2;
-
-import ballerina/net.http;
+import ballerina/http;
 
 @Description {value:"Obtain User from the received http response"}
 @Param {value:"userName: User name of the user"}
 @Param {value:"response: The received http response"}
 @Param {value:"connectorError: Received httpConnectorError object"}
-@Param {value:"User: User struct"}
-@Param {value:"error: Error"}
+@Return {value:"User: User struct"}
+@Return {value:"error: Error"}
 function resolveUser (string userName, http:Response response) returns User|error {
     User user = {};
     error Error = {};
@@ -38,7 +35,7 @@ function resolveUser (string userName, http:Response response) returns User|erro
         var received = response.getJsonPayload();
         match received {
             json payload => {
-                user = <User, convertReceivedPayloadToUser()>payload;
+                user = convertReceivedPayloadToUser(payload);
                 if (user.id.equalsIgnoreCase("")) {
                     Error = {message:failedMessage + "No User with user name " + userName};
                     return Error;
@@ -60,8 +57,8 @@ function resolveUser (string userName, http:Response response) returns User|erro
 @Param {value:"groupName: Name of the group"}
 @Param {value:"response: The received http response"}
 @Param {value:"connectorError: Received httpConnectorError object"}
-@Param {value:"User: Group struct"}
-@Param {value:"error: Error"}
+@Return {value:"Group: Group struct"}
+@Return {value:"error: Error"}
 function resolveGroup (string groupName, http:Response response) returns Group|error {
     Group receivedGroup = {};
     error Error = {};
@@ -74,7 +71,7 @@ function resolveGroup (string groupName, http:Response response) returns Group|e
         var received = response.getJsonPayload();
         match received {
             json payload => {
-                receivedGroup = <Group, convertReceivedPayloadToGroup()>payload;
+                receivedGroup = convertReceivedPayloadToGroup(payload);
                 if (receivedGroup.id.equalsIgnoreCase("")) {
                     Error = {message:failedMessage + "No Group named " + groupName};
                     return Error;
@@ -95,15 +92,21 @@ function resolveGroup (string groupName, http:Response response) returns Group|e
 @Description {value:"Add the necessary headers and body to the request"}
 @Param {value:"body: the json payload to be sent"}
 @Param {value:"OutRequest: http:OutRequest"}
+@Return {value:"Request: HTTP Request"}
 function createRequest (json body) returns http:Request {
-    http:Request request = {};
+    http:Request request =new();
     request.addHeader(SCIM_CONTENT_TYPE, SCIM_JSON);
     request.setJsonPayload(body);
     return request;
 }
 
+@Description {value:"Create the body of the Update request"}
+@Param {value:"valueType: Type of the value to be updated"}
+@Param {value:"newValue: New value of the parameter"}
+@Return {value:"json: Json object"}
+@Return {value:"error: Error object"}
 function createUpdateBody (string valueType, string newValue) returns json|error {
-    json body =? util:parseJson(SCIM_PATCH_ADD_BODY);
+    json body = SCIM_PATCH_ADD_BODY;
     error Error = {};
 
     if (valueType.equalsIgnoreCase("nickName")) {
@@ -140,7 +143,7 @@ function createUpdateBody (string valueType, string newValue) returns json|error
         body.Operations[0].value = {"externalId":newValue};
         return body;
     } else {
-        Error = {message: "No matching value"};
+        Error = {message:"No matching value"};
         return Error;
     }
 
