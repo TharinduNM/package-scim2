@@ -17,12 +17,10 @@
 //
 import ballerina/http;
 
-@Description {value:"Obtain User from the received http response"}
-@Param {value:"userName: User name of the user"}
-@Param {value:"response: The received http response"}
-@Param {value:"connectorError: Received httpConnectorError object"}
-@Return {value:"User: User struct"}
-@Return {value:"error: Error"}
+documentation {Returns a user record if the input http:Response contains a user
+    P{{userName}} User name of the user
+    P{{response}} http:Response with the received response from the SCIM2 API
+}
 function resolveUser (string userName, http:Response response) returns User|error {
     User user = {};
     error Error = {};
@@ -35,13 +33,12 @@ function resolveUser (string userName, http:Response response) returns User|erro
         var received = response.getJsonPayload();
         match received {
             json payload => {
-                user = convertReceivedPayloadToUser(payload);
-                if (user.id.equalsIgnoreCase("")) {
+                if (payload.Resources == null) {
                     Error = {message:failedMessage + "No User with user name " + userName};
                     return Error;
-                } else {
-                    return user;
                 }
+                user = convertReceivedPayloadToUser(payload);
+                return user;
             }
             mime:EntityError e => {
                 Error = {message:failedMessage + e.message, cause:e.cause};
@@ -53,12 +50,10 @@ function resolveUser (string userName, http:Response response) returns User|erro
     return Error;
 }
 
-@Description {value:"Obtain Group from the received http response"}
-@Param {value:"groupName: Name of the group"}
-@Param {value:"response: The received http response"}
-@Param {value:"connectorError: Received httpConnectorError object"}
-@Return {value:"Group: Group struct"}
-@Return {value:"error: Error"}
+documentation {Returns a group record if the input http:Response contains a group
+    P{{groupName}} Name of the group
+    P{{response}} http:Response with the received response from the SCIM2 API
+}
 function resolveGroup (string groupName, http:Response response) returns Group|error {
     Group receivedGroup = {};
     error Error = {};
@@ -71,13 +66,12 @@ function resolveGroup (string groupName, http:Response response) returns Group|e
         var received = response.getJsonPayload();
         match received {
             json payload => {
-                receivedGroup = convertReceivedPayloadToGroup(payload);
-                if (receivedGroup.id.equalsIgnoreCase("")) {
+                if (payload.Resources == null) {
                     Error = {message:failedMessage + "No Group named " + groupName};
                     return Error;
-                } else {
-                    return receivedGroup;
                 }
+                receivedGroup = convertReceivedPayloadToGroup(payload);
+                return receivedGroup;
             }
             mime:EntityError e => {
                 Error = {message:failedMessage + e.message, cause:e.cause};
@@ -89,61 +83,59 @@ function resolveGroup (string groupName, http:Response response) returns Group|e
     return Error;
 }
 
-@Description {value:"Add the necessary headers and body to the request"}
-@Param {value:"body: the json payload to be sent"}
-@Param {value:"OutRequest: http:OutRequest"}
-@Return {value:"Request: HTTP Request"}
+documentation {Returns a http:Request with the json attached to its body
+    P{{body}} Json Object which should be attached to the body of the request
+}
 function createRequest (json body) returns http:Request {
     http:Request request =new();
-    request.addHeader(SCIM_CONTENT_TYPE, SCIM_JSON);
+    request.addHeader(mime:CONTENT_TYPE, mime:APPLICATION_JSON);
     request.setJsonPayload(body);
     return request;
 }
 
-@Description {value:"Create the body of the Update request"}
-@Param {value:"valueType: Type of the value to be updated"}
-@Param {value:"newValue: New value of the parameter"}
-@Return {value:"json: Json object"}
-@Return {value:"error: Error object"}
+documentation {Returns a json object that should be attached to the http:Request to update a user
+    P{{valueType}} The name of the user attribute
+    P{{newValue}} The new value of the attribute
+}
 function createUpdateBody (string valueType, string newValue) returns json|error {
     json body = SCIM_PATCH_ADD_BODY;
     error Error = {};
 
-    if (valueType.equalsIgnoreCase("nickName")) {
-        body.Operations[0].value = {"nickName":newValue};
+    if (valueType.equalsIgnoreCase(SCIM_NICKNAME)) {
+        body.Operations[0].value = {SCIM_NICKNAME:newValue};
         return body;
-    } if (valueType.equalsIgnoreCase("preferredLanguage")) {
-        body.Operations[0].value = {"preferredLanguage":newValue};
+    } if (valueType.equalsIgnoreCase(SCIM_PREFERRED_LANGUAGE)) {
+        body.Operations[0].value = {SCIM_PREFERRED_LANGUAGE:newValue};
         return body;
-    } if (valueType.equalsIgnoreCase("title")) {
-        body.Operations[0].value = {"title":newValue};
+    } if (valueType.equalsIgnoreCase(SCIM_TITLE)) {
+        body.Operations[0].value = {SCIM_TITLE:newValue};
         return body;
-    } if (valueType.equalsIgnoreCase("password")) {
-        body.Operations[0].value = {"password":newValue};
+    } if (valueType.equalsIgnoreCase(SCIM_PASSWORD)) {
+        body.Operations[0].value = {SCIM_PASSWORD:newValue};
         return body;
-    } if (valueType.equalsIgnoreCase("profileUrl")) {
-        body.Operations[0].value = {"profileUrl":newValue};
+    } if (valueType.equalsIgnoreCase(SCIM_PROFILE_URL)) {
+        body.Operations[0].value = {SCIM_PROFILE_URL:newValue};
         return body;
-    } if (valueType.equalsIgnoreCase("locale")) {
-        body.Operations[0].value = {"locale":newValue};
+    } if (valueType.equalsIgnoreCase(SCIM_LOCALE)) {
+        body.Operations[0].value = {SCIM_LOCALE:newValue};
         return body;
-    } if (valueType.equalsIgnoreCase("timezone")) {
-        body.Operations[0].value = {"timezone":newValue};
+    } if (valueType.equalsIgnoreCase(SCIM_TIMEZONE)) {
+        body.Operations[0].value = {SCIM_TIMEZONE:newValue};
         return body;
-    } if (valueType.equalsIgnoreCase("active")) {
-        body.Operations[0].value = {"active":newValue};
+    } if (valueType.equalsIgnoreCase(SCIM_ACTIVE)) {
+        body.Operations[0].value = {SCIM_ACTIVE:newValue};
         return body;
-    } if (valueType.equalsIgnoreCase("userType")) {
-        body.Operations[0].value = {"userType":newValue};
+    } if (valueType.equalsIgnoreCase(SCIM_USERTYPE)) {
+        body.Operations[0].value = {SCIM_USERTYPE:newValue};
         return body;
-    } if (valueType.equalsIgnoreCase("displayName")) {
-        body.Operations[0].value = {"displayName":newValue};
+    } if (valueType.equalsIgnoreCase(SCIM_DISPLAYNAME)) {
+        body.Operations[0].value = {SCIM_DISPLAYNAME:newValue};
         return body;
-    } if (valueType.equalsIgnoreCase("externalId")) {
-        body.Operations[0].value = {"externalId":newValue};
+    } if (valueType.equalsIgnoreCase(SCIM_EXTERNALID)) {
+        body.Operations[0].value = {SCIM_EXTERNALID:newValue};
         return body;
     } else {
-        Error = {message:"No matching value"};
+        Error = {message:"No matching value as " + valueType};
         return Error;
     }
 
