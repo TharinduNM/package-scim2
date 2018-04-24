@@ -9,7 +9,7 @@
  ## Compatibility
  | Ballerina Language Version| SCIM API Version                                          |
  | :------------------------:| :--------------------------------------------------------:|
- | 0.970.0-beta10            | [SCIM2.0](https://tools.ietf.org/html/rfc7643#section-8.3)|
+ | 0.970.0-beta13            | [SCIM2.0](https://tools.ietf.org/html/rfc7643#section-8.3)|
 
  ## Getting Started
   1. Refer https://ballerina.io/learn/getting-started/ to download Ballerina and install tools.
